@@ -6,35 +6,35 @@
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-*Утилита для поиска и управления переменными среды PATH для инструментов разработки в Windows*
+*A utility for finding and managing PATH environment variables for Windows development tools*
 </div>
 
-## 📋 Содержание
-- [Особенности](#-особенности)
-- [Поддерживаемые инструменты](#-поддерживаемые-инструменты)
-- [Установка](#-установка)
-- [Использование](#-использование)
-- [Системные требования](#-системные-требования)
-- [Примечания](#-примечания)
+## 📋 Table of Contents
+- [Features](#-features)
+- [Supported Tools](#-supported-tools)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [System Requirements](#-system-requirements)
+- [Notes](#-notes)
 
-## ✨ Особенности
+## ✨ Features
 
-- 🔄 Интерактивный выбор инструментов по категориям
-- 🔍 Умный поиск в нескольких локациях:
-  - Стандартные пути установки
-  - Реестр Windows
-  - Текущие переменные PATH
-  - Все доступные диски
-- 📝 Подробная информация о найденных исполняемых файлах
-- ⚡ Параллельный поиск для высокой производительности
-- 🛠️ Простое управление PATH:
-  - Просмотр существующих путей
-  - Добавление новых путей
-  - Пропуск дубликатов
+- 🔄 Interactive tool selection by categories
+- 🔍 Smart search across multiple locations:
+  - Standard installation paths
+  - Windows Registry
+  - Current PATH variables
+  - All available drives
+- 📝 Detailed information about found executables
+- ⚡ Parallel search for high performance
+- 🛠️ Easy PATH management:
+  - View existing paths
+  - Add new paths
+  - Skip duplicates
 
-## 🔧 Поддерживаемые инструменты
+## 🔧 Supported Tools
 
-### 🏗️ Системы сборки
+### 🏗️ Build Systems
 - CMake
 - Make (GnuWin32, MSYS2, Cygwin, MinGW)
 - Ninja
@@ -42,76 +42,76 @@
 - Gradle
 - MSBuild
 
-### 💻 Языки программирования
+### 💻 Programming Languages
 - Python
 - Node.js
 - Java JDK
 - Rust
 
-### 🛠️ Инструменты разработки
+### 🛠️ Development Tools
 - Git
 - Visual Studio Code
 - Docker
 - Kubernetes
 
-## 📥 Установка
+## 📥 Installation
 
-1. Скачайте последнюю версию `pathfinder.exe` из [релизов](https://github.com/mr-kotik/DevPathVariableRestorer/releases)
-2. Поместите файл в удобную для вас директорию
-3. Запустите программу от имени администратора
+1. Download the latest version of `pathfinder.exe` from [releases](https://github.com/mr-kotik/DevPathVariableRestorer/releases)
+2. Place the file in a convenient directory
+3. Run the program as administrator
 
-## 🚀 Использование
+## 🚀 Usage
 
-1. Запустите программу:
+1. Launch the program:
    ```
    pathfinder.exe
    ```
 
-2. В главном меню:
-   - Выберите инструменты для поиска, введя их номера через запятую (например: 1,3,5)
-   - Введите 'all' для поиска всех инструментов
-   - Введите 'exit' для выхода из программы
+2. In the main menu:
+   - Select tools to search for by entering their numbers separated by commas (e.g.: 1,3,5)
+   - Type 'all' to search for all tools
+   - Type 'exit' to quit the program
 
-3. Для каждого найденного инструмента:
-   - Просмотрите существующие пути в PATH
-   - Добавьте новые пути в PATH
-   - Пропустите текущий инструмент
+3. For each found tool:
+   - View existing paths in PATH
+   - Add new paths to PATH
+   - Skip the current tool
 
-4. После завершения:
-   - Нажмите Enter для возврата в главное меню
-   - Выберите другие инструменты или завершите работу
+4. After completion:
+   - Press Enter to return to the main menu
+   - Select other tools or exit
 
-## 💻 Системные требования
+## 💻 System Requirements
 
-- Операционная система: Windows
-- Права администратора (для изменения PATH)
-- Минимум 50 МБ свободного места на диске
+- Operating System: Windows
+- Administrator privileges (for modifying PATH)
+- Minimum 50 MB free disk space
 
-## 📝 Примечания
+## 📝 Notes
 
-- Программа нормализует пути для сравнения, но сохраняет оригинальный формат при добавлении в PATH
-- Оптимизация поиска:
-  - Параллельный поиск по дискам
-  - Пропуск системных директорий
-  - Умный порядок поиска (сначала проверяются стандартные места установки)
-- Безопасность:
-  - Проверка дубликатов перед добавлением
-  - Сохранение оригинального формата путей
-  - Защита от некорректных путей
+- The program normalizes paths for comparison but preserves the original format when adding to PATH
+- Search optimization:
+  - Parallel search across drives
+  - Skipping system directories
+  - Smart search order (standard installation locations checked first)
+- Security:
+  - Duplicate checking before addition
+  - Original path format preservation
+  - Protection against invalid paths
 
-## 📄 Лицензия
+## 📄 License
 
-Распространяется под лицензией MIT. Смотрите файл [LICENSE](LICENSE) для получения дополнительной информации.
+Distributed under the MIT License. See [LICENSE](LICENSE) file for more information.
 
-## 🤝 Участие в разработке
+## 🤝 Contributing
 
-Мы приветствуем ваш вклад в развитие проекта! Если у вас есть предложения по улучшению или вы нашли ошибку:
+We welcome your contributions to the project! If you have suggestions for improvements or found a bug:
 
-1. Создайте Issue
-2. Предложите Pull Request
-3. Свяжитесь с разработчиками
+1. Create an Issue
+2. Submit a Pull Request
+3. Contact the developers
 
 ---
 <div align="center">
-Сделано с ❤️ для разработчиков
+Made with ❤️ for developers
 </div> 
