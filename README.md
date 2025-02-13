@@ -124,7 +124,7 @@ DevPathPro is an intelligent environment manager that streamlines the setup and 
 
 ## 📥 Installation
 
-1. Download the latest release from the [releases page](https://github.com/username/DevPathPro/releases)
+1. Download the latest release from the [releases page](https://github.com/mr-kotik/devpathpro/releases)
 2. Run the executable as Administrator
 3. Follow the initial setup wizard
 
@@ -169,7 +169,7 @@ We welcome contributions! Here's how you can help:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## 🙏 Acknowledgments
 
