@@ -20,7 +20,7 @@
 
 `#windows` `#development` `#environment` `#path` `#devtools` `#golang`
 
-[Installation](#installation) • [Features](#features) • [Documentation](#features-in-detail) • [Contributing](#contributing)
+[Installation](#-installation) • [Features](#-key-features) • [Documentation](#-features-in-detail) • [Contributing](#-contributing)
 
 </div>
 
