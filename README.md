@@ -35,6 +35,70 @@ DevPathPro is an intelligent environment manager that streamlines the setup and 
 - 🛠️ **Path Management**: Intelligently manages system PATH entries
 - 🔄 **Configuration Verification**: Checks and corrects existing settings
 - 🎯 **Multi-Environment Support**: Handles multiple development environments
+- 🎛️ **Selective Configuration**: Choose which settings to configure for each tool
+- 🔒 **Security Settings**: Configures secure defaults for databases and services
+- 💾 **Data Directory Management**: Sets up proper data and log directories
+- 🌐 **Network Configuration**: Manages ports and connection settings
+- 🔄 **Cache Management**: Configures cache locations and sizes
+
+## 🎛️ Configuration Options
+
+Each tool offers specific configuration options that can be selected during setup:
+
+### Programming Languages
+
+- **Python**:
+  - Basic: HOME and PATH settings
+  - Environment: Encoding, buffering settings
+  - Development: Warnings, debug, optimization
+  - Pip: Package manager configuration
+
+- **Java**:
+  - Basic: HOME and CLASSPATH
+  - JVM: Memory and performance settings
+
+- **Node.js**:
+  - Basic: Runtime configuration
+  - NPM: Package manager settings
+
+- **Go**:
+  - Basic: GOROOT, GOPATH, modules, proxy settings
+
+- **Rust**:
+  - Basic: Cargo, compiler, and documentation settings
+
+### Build Systems
+
+- **Maven**:
+  - Basic: Repository, memory, and debug settings
+
+- **Gradle**:
+  - Basic: Home, cache, and daemon settings
+
+### Databases
+
+- **PostgreSQL**:
+  - Basic: Data directory, ports, encoding, SSL
+
+- **MySQL**:
+  - Basic: Data directory, ports, configuration
+
+- **MongoDB**:
+  - Basic: Data directory, logs, port settings
+
+- **Redis**:
+  - Basic: Port, configuration, data directory
+
+- **Elasticsearch**:
+  - Basic: Memory, paths, ports configuration
+
+### Infrastructure
+
+- **Docker**:
+  - Basic: BuildKit, experimental features, host settings
+
+- **Kubernetes**:
+  - Basic: Config, editor, Helm settings
 
 ## 🛠️ Supported Tools
 
@@ -154,27 +218,34 @@ DevPathPro is an intelligent environment manager that streamlines the setup and 
    - 🔍 Search and Configure Development Tools
    - ✔️ Verify Existing Configurations
    - 👀 View Current Environment Settings
-3. Follow the on-screen instructions
+3. When tools are found, select configuration options:
+   - Choose "All" for recommended settings
+   - Select specific options for custom configuration
+4. Review and confirm the changes
 
-## 🔍 Features in Detail
+## 🔧 Configuration Process
 
-### Tool Detection
-- Scans common installation directories
-- Supports custom installation paths
-- Identifies multiple versions of tools
+1. **Tool Detection**:
+   - Scans common installation directories
+   - Searches PATH for executables
+   - Optional deep search across all drives
 
-### Environment Configuration
-- Creates required environment variables
-- Sets optimal tool-specific settings
-- Manages PATH entries efficiently
-- Validates existing configurations
+2. **Configuration Selection**:
+   - Lists available configuration groups
+   - Allows multiple option selection
+   - Shows detailed description for each option
 
-### Configuration Verification
-- Performs comprehensive environment checks
-- Identifies misconfigured variables
-- Suggests optimal corrections
-- Applies fixes automatically
-- Prompts for system restart when needed
+3. **Environment Setup**:
+   - Sets required environment variables
+   - Configures tool-specific settings
+   - Manages PATH entries
+   - Sets up data directories
+
+4. **Verification**:
+   - Checks applied configurations
+   - Validates paths and permissions
+   - Tests connectivity where applicable
+   - Suggests corrections if needed
 
 ## 🤝 Contributing
 
