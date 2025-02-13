@@ -1,117 +1,176 @@
-# 🔍 Path Finder
+# DevPathPro
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![DevPathPro Logo](https://via.placeholder.com/150)
 
-*A utility for finding and managing PATH environment variables for Windows development tools*
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)](https://www.microsoft.com/windows)
+[![GitHub release](https://img.shields.io/github/v/release/username/DevPathPro?include_prereleases)](https://github.com/username/DevPathPro/releases)
+[![GitHub issues](https://img.shields.io/github/issues/username/DevPathPro)](https://github.com/username/DevPathPro/issues)
+
+*A powerful Windows development environment manager that automatically detects, verifies, and configures your development tools.*
+
+[Installation](#installation) • [Features](#features) • [Documentation](#features-in-detail) • [Contributing](#contributing)
+
 </div>
 
-## 📋 Table of Contents
-- [Features](#-features)
-- [Supported Tools](#-supported-tools)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [System Requirements](#-system-requirements)
-- [Notes](#-notes)
+## 🚀 Overview
 
-## ✨ Features
+DevPathPro is an intelligent environment manager that streamlines the setup and maintenance of your development tools on Windows. It automatically detects installed tools, verifies their configurations, and ensures optimal environment settings.
 
-- 🔄 Interactive tool selection by categories
-- 🔍 Smart search across multiple locations:
-  - Standard installation paths
-  - Windows Registry
-  - Current PATH variables
-  - All available drives
-- 📝 Detailed information about found executables
-- ⚡ Parallel search for high performance
-- 🛠️ Easy PATH management:
-  - View existing paths
-  - Add new paths
-  - Skip duplicates
+## ✨ Key Features
 
-## 🔧 Supported Tools
+- 🔍 **Automatic Tool Detection**: Finds installed development tools across your system
+- ⚙️ **Smart Configuration**: Sets up and maintains environment variables
+- 🛠️ **Path Management**: Intelligently manages system PATH entries
+- 🔄 **Configuration Verification**: Checks and corrects existing settings
+- 🎯 **Multi-Environment Support**: Handles multiple development environments
 
-### 🏗️ Build Systems
-- CMake
-- Make (GnuWin32, MSYS2, Cygwin, MinGW)
-- Ninja
-- Maven
-- Gradle
-- MSBuild
+## 🛠️ Supported Tools
 
-### 💻 Programming Languages
+<details>
+<summary>💻 Programming Languages</summary>
+
 - Python
 - Node.js
-- Java JDK
+- Java
+- Go
 - Rust
+- Perl
+- Scala
+- Kotlin
+- Swift
+- Haskell
+- Erlang
+- Elixir
+- .NET Core
+- Ruby
+</details>
 
-### 🛠️ Development Tools
+<details>
+<summary>🏗️ Build Systems</summary>
+
+- CMake
+- MSBuild
+- Maven
+- Gradle
+- Make
+- Ninja
+</details>
+
+<details>
+<summary>🔧 Development Tools</summary>
+
 - Git
-- Visual Studio Code
+- Visual Studio
+- VS Code
 - Docker
 - Kubernetes
+- Windows SDK
+- WDK
+- LLVM
+- Jenkins
+- SonarQube
+- Grafana
+</details>
+
+<details>
+<summary>📦 Package Managers</summary>
+
+- vcpkg
+- Conan
+</details>
+
+<details>
+<summary>💾 Databases</summary>
+
+- PostgreSQL
+- MySQL
+- MongoDB
+- Redis
+- Elasticsearch
+- SQLite
+- Oracle
+- Cassandra
+- Neo4j
+- InfluxDB
+</details>
+
+<details>
+<summary>☁️ Infrastructure</summary>
+
+- Terraform
+- Ansible
+- Podman
+- Helm
+- Skaffold
+</details>
+
+## 📋 Requirements
+
+- Windows 10 or later
+- Administrator privileges
+- PowerShell or Command Prompt
 
 ## 📥 Installation
 
-1. Download the latest version of `pathfinder.exe` from [releases](https://github.com/mr-kotik/DevPathVariableRestorer/releases)
-2. Place the file in a convenient directory
-3. Run the program as administrator
+1. Download the latest release from the [releases page](https://github.com/username/DevPathPro/releases)
+2. Run the executable as Administrator
+3. Follow the initial setup wizard
 
-## 🚀 Usage
+## 🚦 Usage
 
-1. Launch the program:
-   ```
-   pathfinder.exe
-   ```
+1. Launch DevPathPro as Administrator
+2. Choose from the main menu:
+   - 🔍 Search and Configure Development Tools
+   - ✔️ Verify Existing Configurations
+   - 👀 View Current Environment Settings
+3. Follow the on-screen instructions
 
-2. In the main menu:
-   - Select tools to search for by entering their numbers separated by commas (e.g.: 1,3,5)
-   - Type 'all' to search for all tools
-   - Type 'exit' to quit the program
+## 🔍 Features in Detail
 
-3. For each found tool:
-   - View existing paths in PATH
-   - Add new paths to PATH
-   - Skip the current tool
+### Tool Detection
+- Scans common installation directories
+- Supports custom installation paths
+- Identifies multiple versions of tools
 
-4. After completion:
-   - Press Enter to return to the main menu
-   - Select other tools or exit
+### Environment Configuration
+- Creates required environment variables
+- Sets optimal tool-specific settings
+- Manages PATH entries efficiently
+- Validates existing configurations
 
-## 💻 System Requirements
-
-- Operating System: Windows
-- Administrator privileges (for modifying PATH)
-- Minimum 50 MB free disk space
-
-## 📝 Notes
-
-- The program normalizes paths for comparison but preserves the original format when adding to PATH
-- Search optimization:
-  - Parallel search across drives
-  - Skipping system directories
-  - Smart search order (standard installation locations checked first)
-- Security:
-  - Duplicate checking before addition
-  - Original path format preservation
-  - Protection against invalid paths
-
-## 📄 License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) file for more information.
+### Configuration Verification
+- Performs comprehensive environment checks
+- Identifies misconfigured variables
+- Suggests optimal corrections
+- Applies fixes automatically
+- Prompts for system restart when needed
 
 ## 🤝 Contributing
 
-We welcome your contributions to the project! If you have suggestions for improvements or found a bug:
+We welcome contributions! Here's how you can help:
 
-1. Create an Issue
-2. Submit a Pull Request
-3. Contact the developers
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Thanks to all contributors who have helped shape DevPathPro
+- Special thanks to the open-source community for the amazing tools we support
 
 ---
+
 <div align="center">
-Made with ❤️ for developers
+
+Made with ❤️ by [Your Name](https://github.com/username)
+
 </div> 
