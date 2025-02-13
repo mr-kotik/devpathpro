@@ -2,14 +2,22 @@
 
 <div align="center">
 
-![DevPathPro Logo](https://via.placeholder.com/150)
+```
+ ____             ____       _   _     ____
+|  _ \  _____   _|  _ \ __ _| |_| |__ |  _ \ _ __ ___
+| | | |/ _ \ \ / / |_) / _` | __| '_ \| |_) | '__/ _ \
+| |_| |  __/\ V /|  __/ (_| | |_| | | |  __/| | | (_) |
+|____/ \___| \_/ |_|   \__,_|\__|_| |_|_|   |_|  \___/
+```
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)](https://www.microsoft.com/windows)
-[![GitHub release](https://img.shields.io/github/v/release/username/DevPathPro?include_prereleases)](https://github.com/username/DevPathPro/releases)
-[![GitHub issues](https://img.shields.io/github/issues/username/DevPathPro)](https://github.com/username/DevPathPro/issues)
+[![GitHub release](https://img.shields.io/github/v/release/mr-kotik/DevPathPro?include_prereleases)](https://github.com/mr-kotik/devpathpro/releases)
+[![GitHub issues](https://img.shields.io/github/issues/mr-kotik/DevPathPro)](https://github.com/mr-kotik/devpathpro/issues)
 
-*A powerful Windows development environment manager that automatically detects, verifies, and configures your development tools.*
+🛠️ A powerful Windows environment manager that automatically detects, verifies, and configures development tools. Supports over 40 tools including programming languages, databases, build systems, and infrastructure solutions.
+
+`#windows` `#development` `#environment` `#path` `#devtools` `#golang`
 
 [Installation](#installation) • [Features](#features) • [Documentation](#features-in-detail) • [Contributing](#contributing)
 
@@ -171,6 +179,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-Made with ❤️ by [Your Name](https://github.com/username)
+Made with ❤️ by [Alesta](https://github.com/mr-kotik)
 
 </div> 
