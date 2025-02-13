@@ -121,6 +121,25 @@ DevPathPro is an intelligent environment manager that streamlines the setup and 
 - Windows 10 or later
 - Administrator privileges
 - PowerShell or Command Prompt
+- Go 1.21 or later (for building from source)
+
+## 🔨 Building from Source
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/mr-kotik/devpathpro.git
+   cd devpathpro
+   ```
+
+2. Build the project:
+   ```bash
+   go build -o DevPathPro.exe
+   ```
+
+3. (Optional) Run tests:
+   ```bash
+   go test ./...
+   ```
 
 ## 📥 Installation
 
