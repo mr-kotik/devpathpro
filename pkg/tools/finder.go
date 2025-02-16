@@ -1,14 +1,16 @@
 package tools
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
-	"github.com/mr-kotik/devpathpro/pkg/config"
+	"devpathpro/pkg/config"
 )
 
 // FindProgram searches for a program in the system
@@ -138,4 +140,53 @@ func SearchInDrive(drive, executableName string, resultChan chan<- string) {
 		}
 		return nil
 	})
+}
+
+// SelectPath asks user to choose a path when multiple installations are found
+func SelectPath(paths []string, programName string) (string, error) {
+	if len(paths) == 0 {
+		return "", fmt.Errorf("no paths provided")
+	}
+	
+	if len(paths) == 1 {
+		return paths[0], nil
+	}
+
+	fmt.Printf("\nMultiple installations of %s found:\n", programName)
+	for i, path := range paths {
+		fmt.Printf("[%d] %s\n", i+1, path)
+	}
+	fmt.Print("\nSelect path to use (enter number): ")
+
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+		
+		if num, err := strconv.Atoi(input); err == nil && num > 0 && num <= len(paths) {
+			return paths[num-1], nil
+		}
+		fmt.Print("Invalid selection. Please try again: ")
+	}
+}
+
+// ConfigureSelectedPath configures the program with the selected path
+func ConfigureSelectedPath(prog config.Program, selectedPath string) error {
+	// Set environment variables if specified
+	if prog.EnvVar != "" {
+		if err := os.Setenv(prog.EnvVar, filepath.Dir(selectedPath)); err != nil {
+			return fmt.Errorf("failed to set %s: %v", prog.EnvVar, err)
+		}
+	}
+
+	// Add to PATH if needed
+	pathVar := os.Getenv("PATH")
+	if !strings.Contains(pathVar, filepath.Dir(selectedPath)) {
+		newPath := pathVar + ";" + filepath.Dir(selectedPath)
+		if err := os.Setenv("PATH", newPath); err != nil {
+			return fmt.Errorf("failed to update PATH: %v", err)
+		}
+	}
+
+	return nil
 } 

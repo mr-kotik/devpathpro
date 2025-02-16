@@ -13,8 +13,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)](https://www.microsoft.com/windows)
-[![GitHub release](https://img.shields.io/github/v/release/mr-kotik/DevPathPro?include_prereleases)](https://github.com/mr-kotik/devpathpro/releases)
-[![GitHub issues](https://img.shields.io/github/issues/mr-kotik/DevPathPro)](https://github.com/mr-kotik/devpathpro/issues)
+[![GitHub release](https://img.shields.io/github/v/release/AlestackOverglow/DevPathPro?include_prereleases)](https://github.com/AlestackOverglow/devpathpro/releases)
+[![GitHub issues](https://img.shields.io/github/issues/AlestackOverglow/DevPathPro)](https://github.com/AlestackOverglow/devpathpro/issues)
 
 🛠️ A powerful Windows environment manager that automatically detects, verifies, and configures development tools. Supports over 40 tools including programming languages, databases, build systems, and infrastructure solutions.
 
@@ -191,7 +191,7 @@ Each tool offers specific configuration options that can be selected during setu
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/mr-kotik/devpathpro.git
+   git clone https://github.com/AlestackOverglow/devpathpro.git
    cd devpathpro
    ```
 
@@ -207,7 +207,7 @@ Each tool offers specific configuration options that can be selected during setu
 
 ## 📥 Installation
 
-1. Download the latest release from the [releases page](https://github.com/mr-kotik/devpathpro/releases)
+1. Download the latest release from the [releases page](https://github.com/AlestackOverglow/devpathpro/releases)
 2. Run the executable as Administrator
 3. Follow the initial setup wizard
 

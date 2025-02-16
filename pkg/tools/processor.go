@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mr-kotik/devpathpro/pkg/config"
-	"github.com/mr-kotik/devpathpro/pkg/registry"
+	"devpathpro/pkg/config"
+	"devpathpro/pkg/registry"
 )
 
 type ProcessResult struct {
@@ -341,7 +341,18 @@ func ProcessToolsDeepSearch(programs []config.Program) []ProcessResult {
 			result.Found = true
 			result.Paths = allPaths
 
-			if err := configureProgram(prog, allPaths[0], nil); err != nil {
+			fmt.Printf("\nFound %s in:\n", prog.Name)
+			for _, p := range allPaths {
+				fmt.Printf("  - %s\n", p)
+			}
+
+			selectedPath, err := SelectPath(allPaths, prog.Name)
+			if err != nil {
+				result.Error = fmt.Errorf("error selecting path for %s: %v", prog.Name, err)
+				continue
+			}
+
+			if err := configureProgram(prog, selectedPath, nil); err != nil {
 				result.Error = fmt.Errorf("error configuring %s: %v", prog.Name, err)
 			}
 		}
@@ -476,7 +487,7 @@ func configurePython(path string, selectedVars []string) error {
 	// If no specific variables selected, configure all
 	if len(selectedVars) == 0 {
 		for key, value := range pythonConfig {
-			if err := os.Setenv(key, value); err != nil {
+			if err := registry.SetEnvironmentVariable(key, value); err != nil {
 				return fmt.Errorf("error setting %s: %v", key, err)
 			}
 		}
@@ -484,7 +495,7 @@ func configurePython(path string, selectedVars []string) error {
 		// Configure only selected variables
 		for _, key := range selectedVars {
 			if value, exists := pythonConfig[key]; exists {
-				if err := os.Setenv(key, value); err != nil {
+				if err := registry.SetEnvironmentVariable(key, value); err != nil {
 					return fmt.Errorf("error setting %s: %v", key, err)
 				}
 			}
@@ -502,12 +513,6 @@ func configurePython(path string, selectedVars []string) error {
 func configureJava(path string, selectedVars []string) error {
 	javaDir := filepath.Dir(filepath.Dir(path))
 	
-	// Set JAVA_HOME
-	if err := os.Setenv("JAVA_HOME", javaDir); err != nil {
-		return fmt.Errorf("error setting JAVA_HOME: %v", err)
-	}
-
-	// Добавляем новые настройки
 	// JDK инструменты
 	toolsJar := filepath.Join(javaDir, "lib", "tools.jar")
 	dtJar := filepath.Join(javaDir, "lib", "dt.jar")
@@ -516,40 +521,36 @@ func configureJava(path string, selectedVars []string) error {
 	if existing := os.Getenv("CLASSPATH"); existing != "" {
 		classpath = append(classpath, existing)
 	}
-	
-	if err := os.Setenv("CLASSPATH", strings.Join(classpath, ";")); err != nil {
-		return fmt.Errorf("error setting CLASSPATH: %v", err)
-	}
 
-	// Настройки JVM
-	if err := os.Setenv("_JAVA_OPTIONS", "-Xmx2048m -Xms512m"); err != nil {
-		return fmt.Errorf("error setting _JAVA_OPTIONS: %v", err)
+	// Define all possible configurations
+	javaConfig := map[string]string{
+		"JAVA_HOME": javaDir,
+		"CLASSPATH": strings.Join(classpath, ";"),
+		"_JAVA_OPTIONS": "-Xmx2048m -Xms512m",
 	}
 
 	// If no specific variables selected, configure all
 	if len(selectedVars) == 0 {
-		for key, value := range map[string]string{
-			"JAVA_HOME": javaDir,
-			"CLASSPATH": strings.Join(classpath, ";"),
-			"_JAVA_OPTIONS": "-Xmx2048m -Xms512m",
-		} {
-			if err := os.Setenv(key, value); err != nil {
+		for key, value := range javaConfig {
+			if err := registry.SetEnvironmentVariable(key, value); err != nil {
 				return fmt.Errorf("error setting %s: %v", key, err)
 			}
 		}
 	} else {
 		// Configure only selected variables
 		for _, key := range selectedVars {
-			if value, exists := map[string]string{
-				"JAVA_HOME": javaDir,
-				"CLASSPATH": strings.Join(classpath, ";"),
-				"_JAVA_OPTIONS": "-Xmx2048m -Xms512m",
-			}[key]; exists {
-				if err := os.Setenv(key, value); err != nil {
+			if value, exists := javaConfig[key]; exists {
+				if err := registry.SetEnvironmentVariable(key, value); err != nil {
 					return fmt.Errorf("error setting %s: %v", key, err)
 				}
 			}
 		}
+	}
+
+	// Add bin directory to PATH
+	binDir := filepath.Join(javaDir, "bin")
+	if err := registry.AddToPath(binDir); err != nil {
+		return fmt.Errorf("error adding Java bin to PATH: %v", err)
 	}
 
 	return nil
@@ -570,7 +571,7 @@ func configureNodejs(path string, selectedVars []string) error {
 	// If no specific variables selected, configure all
 	if len(selectedVars) == 0 {
 		for key, value := range nodeConfig {
-			if err := os.Setenv(key, value); err != nil {
+			if err := registry.SetEnvironmentVariable(key, value); err != nil {
 				return fmt.Errorf("error setting %s: %v", key, err)
 			}
 		}
@@ -578,11 +579,17 @@ func configureNodejs(path string, selectedVars []string) error {
 		// Configure only selected variables
 		for _, key := range selectedVars {
 			if value, exists := nodeConfig[key]; exists {
-				if err := os.Setenv(key, value); err != nil {
+				if err := registry.SetEnvironmentVariable(key, value); err != nil {
 					return fmt.Errorf("error setting %s: %v", key, err)
 				}
 			}
 		}
+	}
+
+	// Add npm global modules to PATH
+	npmBinDir := filepath.Join(os.Getenv("APPDATA"), "npm")
+	if err := registry.AddToPath(npmBinDir); err != nil {
+		return fmt.Errorf("error adding npm bin to PATH: %v", err)
 	}
 
 	return nil
@@ -606,7 +613,7 @@ func configureGo(path string, selectedVars []string) error {
 	// If no specific variables selected, configure all
 	if len(selectedVars) == 0 {
 		for key, value := range goConfig {
-			if err := os.Setenv(key, value); err != nil {
+			if err := registry.SetEnvironmentVariable(key, value); err != nil {
 				return fmt.Errorf("error setting %s: %v", key, err)
 			}
 		}
@@ -614,11 +621,19 @@ func configureGo(path string, selectedVars []string) error {
 		// Configure only selected variables
 		for _, key := range selectedVars {
 			if value, exists := goConfig[key]; exists {
-				if err := os.Setenv(key, value); err != nil {
+				if err := registry.SetEnvironmentVariable(key, value); err != nil {
 					return fmt.Errorf("error setting %s: %v", key, err)
 				}
 			}
 		}
+	}
+
+	// Add Go bin directories to PATH
+	if err := registry.AddToPath(filepath.Join(goDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Go bin to PATH: %v", err)
+	}
+	if err := registry.AddToPath(filepath.Join(os.Getenv("USERPROFILE"), "go", "bin")); err != nil {
+		return fmt.Errorf("error adding GOPATH bin to PATH: %v", err)
 	}
 
 	return nil
@@ -639,9 +654,14 @@ func configureRust(path string) error {
 	}
 
 	for key, value := range rustConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Cargo bin to PATH
+	if err := registry.AddToPath(filepath.Join(os.Getenv("USERPROFILE"), ".cargo", "bin")); err != nil {
+		return fmt.Errorf("error adding Cargo bin to PATH: %v", err)
 	}
 
 	return nil
@@ -661,9 +681,14 @@ func configureMaven(path string) error {
 	}
 
 	for key, value := range mavenConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Maven bin to PATH
+	if err := registry.AddToPath(filepath.Join(mavenDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Maven bin to PATH: %v", err)
 	}
 
 	return nil
@@ -683,9 +708,14 @@ func configureGradle(path string) error {
 	}
 
 	for key, value := range gradleConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Gradle bin to PATH
+	if err := registry.AddToPath(filepath.Join(gradleDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Gradle bin to PATH: %v", err)
 	}
 
 	return nil
@@ -705,9 +735,14 @@ func configureScala(path string) error {
 	}
 
 	for key, value := range scalaConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Scala bin to PATH
+	if err := registry.AddToPath(filepath.Join(scalaDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Scala bin to PATH: %v", err)
 	}
 
 	return nil
@@ -727,9 +762,14 @@ func configureKotlin(path string) error {
 	}
 
 	for key, value := range kotlinConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Kotlin bin to PATH
+	if err := registry.AddToPath(filepath.Join(kotlinDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Kotlin bin to PATH: %v", err)
 	}
 
 	return nil
@@ -750,9 +790,14 @@ func configureErlang(path string) error {
 	}
 
 	for key, value := range erlangConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Erlang bin to PATH
+	if err := registry.AddToPath(filepath.Join(erlangDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Erlang bin to PATH: %v", err)
 	}
 
 	return nil
@@ -774,9 +819,14 @@ func configureElixir(path string) error {
 	}
 
 	for key, value := range elixirConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Elixir bin to PATH
+	if err := registry.AddToPath(filepath.Join(elixirDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Elixir bin to PATH: %v", err)
 	}
 
 	return nil
@@ -798,7 +848,7 @@ func configureDocker(path string, selectedVars []string) error {
 	// If no specific variables selected, configure all
 	if len(selectedVars) == 0 {
 		for key, value := range dockerConfig {
-			if err := os.Setenv(key, value); err != nil {
+			if err := registry.SetEnvironmentVariable(key, value); err != nil {
 				return fmt.Errorf("error setting %s: %v", key, err)
 			}
 		}
@@ -806,11 +856,16 @@ func configureDocker(path string, selectedVars []string) error {
 		// Configure only selected variables
 		for _, key := range selectedVars {
 			if value, exists := dockerConfig[key]; exists {
-				if err := os.Setenv(key, value); err != nil {
+				if err := registry.SetEnvironmentVariable(key, value); err != nil {
 					return fmt.Errorf("error setting %s: %v", key, err)
 				}
 			}
 		}
+	}
+
+	// Add Docker bin to PATH
+	if err := registry.AddToPath(filepath.Join(dockerDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Docker bin to PATH: %v", err)
 	}
 
 	return nil
@@ -829,7 +884,7 @@ func configureKubernetes(path string, selectedVars []string) error {
 	// If no specific variables selected, configure all
 	if len(selectedVars) == 0 {
 		for key, value := range k8sConfig {
-			if err := os.Setenv(key, value); err != nil {
+			if err := registry.SetEnvironmentVariable(key, value); err != nil {
 				return fmt.Errorf("error setting %s: %v", key, err)
 			}
 		}
@@ -837,7 +892,7 @@ func configureKubernetes(path string, selectedVars []string) error {
 		// Configure only selected variables
 		for _, key := range selectedVars {
 			if value, exists := k8sConfig[key]; exists {
-				if err := os.Setenv(key, value); err != nil {
+				if err := registry.SetEnvironmentVariable(key, value); err != nil {
 					return fmt.Errorf("error setting %s: %v", key, err)
 				}
 			}
@@ -871,9 +926,14 @@ func configurePostgreSQL(path string) error {
 	}
 
 	for key, value := range pgConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add PostgreSQL bin to PATH
+	if err := registry.AddToPath(filepath.Join(pgDir, "bin")); err != nil {
+		return fmt.Errorf("error adding PostgreSQL bin to PATH: %v", err)
 	}
 
 	return nil
@@ -882,7 +942,7 @@ func configurePostgreSQL(path string) error {
 func configureMySQL(path string) error {
 	mysqlDir := filepath.Dir(filepath.Dir(path))
 	
-	// Основные настройки
+	// Основные настройки MySQL
 	mysqlConfig := map[string]string{
 		"MYSQL_HOME": mysqlDir,
 		"MYSQL_TCP_PORT": "3306",
@@ -893,9 +953,14 @@ func configureMySQL(path string) error {
 	}
 
 	for key, value := range mysqlConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add MySQL bin to PATH
+	if err := registry.AddToPath(filepath.Join(mysqlDir, "bin")); err != nil {
+		return fmt.Errorf("error adding MySQL bin to PATH: %v", err)
 	}
 
 	return nil
@@ -904,7 +969,7 @@ func configureMySQL(path string) error {
 func configureMongoDB(path string) error {
 	mongoDir := filepath.Dir(filepath.Dir(path))
 	
-	// Основные настройки
+	// Основные настройки MongoDB
 	mongoConfig := map[string]string{
 		"MONGODB_HOME": mongoDir,
 		"MONGO_DATA_DIR": filepath.Join(mongoDir, "data", "db"),
@@ -914,9 +979,14 @@ func configureMongoDB(path string) error {
 	}
 
 	for key, value := range mongoConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add MongoDB bin to PATH
+	if err := registry.AddToPath(filepath.Join(mongoDir, "bin")); err != nil {
+		return fmt.Errorf("error adding MongoDB bin to PATH: %v", err)
 	}
 
 	return nil
@@ -925,7 +995,7 @@ func configureMongoDB(path string) error {
 func configureRedis(path string) error {
 	redisDir := filepath.Dir(filepath.Dir(path))
 	
-	// Основные настройки
+	// Основные настройки Redis
 	redisConfig := map[string]string{
 		"REDIS_HOME": redisDir,
 		"REDIS_PORT": "6379",
@@ -935,9 +1005,14 @@ func configureRedis(path string) error {
 	}
 
 	for key, value := range redisConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Redis bin to PATH
+	if err := registry.AddToPath(filepath.Join(redisDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Redis bin to PATH: %v", err)
 	}
 
 	return nil
@@ -946,7 +1021,7 @@ func configureRedis(path string) error {
 func configureElasticsearch(path string) error {
 	esDir := filepath.Dir(filepath.Dir(path))
 	
-	// Основные настройки
+	// Основные настройки Elasticsearch
 	esConfig := map[string]string{
 		"ES_HOME": esDir,
 		"ES_PATH_CONF": filepath.Join(esDir, "config"),
@@ -958,9 +1033,14 @@ func configureElasticsearch(path string) error {
 	}
 
 	for key, value := range esConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Elasticsearch bin to PATH
+	if err := registry.AddToPath(filepath.Join(esDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Elasticsearch bin to PATH: %v", err)
 	}
 
 	return nil
@@ -980,9 +1060,14 @@ func configureOracle(path string) error {
 	}
 
 	for key, value := range oracleConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Oracle bin to PATH
+	if err := registry.AddToPath(filepath.Join(oracleDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Oracle bin to PATH: %v", err)
 	}
 
 	return nil
@@ -1004,9 +1089,14 @@ func configureCassandra(path string) error {
 	}
 
 	for key, value := range cassandraConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Cassandra bin to PATH
+	if err := registry.AddToPath(filepath.Join(cassandraDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Cassandra bin to PATH: %v", err)
 	}
 
 	return nil
@@ -1035,9 +1125,14 @@ func configureNeo4j(path string) error {
 	}
 
 	for key, value := range neo4jConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add Neo4j bin to PATH
+	if err := registry.AddToPath(filepath.Join(neo4jDir, "bin")); err != nil {
+		return fmt.Errorf("error adding Neo4j bin to PATH: %v", err)
 	}
 
 	return nil
@@ -1067,9 +1162,14 @@ func configureInfluxDB(path string) error {
 	}
 
 	for key, value := range influxConfig {
-		if err := os.Setenv(key, value); err != nil {
+		if err := registry.SetEnvironmentVariable(key, value); err != nil {
 			return fmt.Errorf("error setting %s: %v", key, err)
 		}
+	}
+
+	// Add InfluxDB bin to PATH
+	if err := registry.AddToPath(filepath.Join(influxDir, "bin")); err != nil {
+		return fmt.Errorf("error adding InfluxDB bin to PATH: %v", err)
 	}
 
 	return nil

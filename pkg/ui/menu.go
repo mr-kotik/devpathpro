@@ -9,9 +9,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mr-kotik/devpathpro/pkg/config"
-	"github.com/mr-kotik/devpathpro/pkg/tools"
-	"github.com/mr-kotik/devpathpro/pkg/utils"
+	"devpathpro/pkg/config"
+	"devpathpro/pkg/tools"
+	"devpathpro/pkg/utils"
+	"devpathpro/pkg/backup"
 )
 
 // MainMenu displays and handles the main menu
@@ -27,10 +28,11 @@ func MainMenu(cfg *config.Configuration) {
 		fmt.Println("1. Search and Configure Development Tools")
 		fmt.Println("2. Verify Existing Configurations")
 		fmt.Println("3. View Current Environment Settings")
-		fmt.Println("4. Clear Screen")
-		fmt.Println("5. Exit")
+		fmt.Println("4. Manage Backups")
+		fmt.Println("5. Clear Screen")
+		fmt.Println("6. Exit")
 		
-		fmt.Print("\nSelect an option (1-5): ")
+		fmt.Print("\nSelect an option (1-6): ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
@@ -42,8 +44,10 @@ func MainMenu(cfg *config.Configuration) {
 		case "3":
 			ViewEnvironmentMenu()
 		case "4":
-			continue
+			ManageBackupsMenu()
 		case "5":
+			continue
+		case "6":
 			utils.ClearScreen()
 			fmt.Println("\nThank you for using DevPathPro!")
 			fmt.Println("Exiting program...")
@@ -249,29 +253,42 @@ func ProcessSelectedTools(programs []config.Program) {
 	}
 	fmt.Println("\n")
 
-	results := tools.ProcessTools(programs)
-	
-	// Display results
+	// Create backup before making any changes
+	if err := backup.CreateBackup(); err != nil {
+		fmt.Printf("Warning: Failed to create backup: %v\n", err)
+	}
+
 	configurationChanged := false
 	notFoundPrograms := make([]config.Program, 0)
 
-	for _, result := range results {
-		fmt.Printf("\n=== %s ===\n", result.Program.Name)
-		if !result.Found {
+	for _, prog := range programs {
+		fmt.Printf("\n=== %s ===\n", prog.Name)
+		
+		// Search for program
+		paths := tools.FindProgram(prog)
+		if len(paths) == 0 {
 			fmt.Printf("❌ Not found in common locations\n")
-			notFoundPrograms = append(notFoundPrograms, result.Program)
+			notFoundPrograms = append(notFoundPrograms, prog)
 			continue
 		}
 
 		fmt.Printf("✅ Found in:\n")
-		for _, path := range result.Paths {
+		for _, path := range paths {
 			fmt.Printf("  - %s\n", path)
 		}
 
-		if result.Error != nil {
-			fmt.Printf("⚠️ Configuration error: %v\n", result.Error)
+		// Let user select path if multiple found
+		selectedPath, err := tools.SelectPath(paths, prog.Name)
+		if err != nil {
+			fmt.Printf("⚠️ Error selecting path: %v\n", err)
+			continue
+		}
+
+		// Configure selected path
+		if err := tools.ConfigureSelectedPath(prog, selectedPath); err != nil {
+			fmt.Printf("⚠️ Configuration error: %v\n", err)
 		} else {
-			fmt.Printf("✅ Successfully configured\n")
+			fmt.Printf("✅ Successfully configured using: %s\n", selectedPath)
 			configurationChanged = true
 		}
 	}
@@ -286,26 +303,58 @@ func ProcessSelectedTools(programs []config.Program) {
 		
 		if answer == "y" || answer == "yes" {
 			fmt.Println("\nStarting deep search. This may take a while...")
-			deepResults := tools.ProcessToolsDeepSearch(notFoundPrograms)
 			
-			// Display deep search results
-			for _, result := range deepResults {
-				fmt.Printf("\n=== %s ===\n", result.Program.Name)
-				if !result.Found {
-					fmt.Printf("❌ Not found anywhere on this system\n")
-					continue
+			// Create channels for results
+			resultChan := make(chan string)
+			doneChan := make(chan bool)
+			
+			// Get all drives
+			drives := tools.GetAllDrives()
+			
+			// Start search on each drive
+			for _, prog := range notFoundPrograms {
+				var paths []string
+				
+				// Search in each drive
+				for _, drive := range drives {
+					go tools.SearchInDrive(drive, prog.ExecutableName, resultChan)
 				}
-
-				fmt.Printf("✅ Found in:\n")
-				for _, path := range result.Paths {
-					fmt.Printf("  - %s\n", path)
-				}
-
-				if result.Error != nil {
-					fmt.Printf("⚠️ Configuration error: %v\n", result.Error)
+				
+				// Collect results
+				go func() {
+					for path := range resultChan {
+						paths = append(paths, path)
+					}
+					doneChan <- true
+				}()
+				
+				// Wait for all searches to complete
+				<-doneChan
+				
+				if len(paths) > 0 {
+					fmt.Printf("\n=== %s ===\n", prog.Name)
+					fmt.Printf("✅ Found in:\n")
+					for _, path := range paths {
+						fmt.Printf("  - %s\n", path)
+					}
+					
+					// Let user select path
+					selectedPath, err := tools.SelectPath(paths, prog.Name)
+					if err != nil {
+						fmt.Printf("⚠️ Error selecting path: %v\n", err)
+						continue
+					}
+					
+					// Configure selected path
+					if err := tools.ConfigureSelectedPath(prog, selectedPath); err != nil {
+						fmt.Printf("⚠️ Configuration error: %v\n", err)
+					} else {
+						fmt.Printf("✅ Successfully configured using: %s\n", selectedPath)
+						configurationChanged = true
+					}
 				} else {
-					fmt.Printf("✅ Successfully configured\n")
-					configurationChanged = true
+					fmt.Printf("\n=== %s ===\n", prog.Name)
+					fmt.Printf("❌ Not found anywhere on this system\n")
 				}
 			}
 		}
@@ -326,4 +375,83 @@ func ProcessSelectedTools(programs []config.Program) {
 
 	fmt.Println("\nPress Enter to return to main menu...")
 	bufio.NewReader(os.Stdin).ReadString('\n')
+}
+
+// ManageBackupsMenu displays the backup management menu
+func ManageBackupsMenu() {
+	for {
+		utils.ClearScreen()
+		fmt.Println("\nBackup Management")
+		utils.PrintDivider("-", 80)
+		
+		fmt.Println("\n1. Create New Backup")
+		fmt.Println("2. List Available Backups")
+		fmt.Println("3. Restore Backup")
+		fmt.Println("4. Return to Main Menu")
+		
+		fmt.Print("\nSelect an option (1-4): ")
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+
+		switch input {
+		case "1":
+			if err := backup.CreateBackup(); err != nil {
+				fmt.Printf("\n❌ Failed to create backup: %v\n", err)
+			} else {
+				fmt.Println("\n✅ Backup created successfully!")
+			}
+			
+		case "2":
+			backups, err := backup.ListBackups()
+			if err != nil {
+				fmt.Printf("\n❌ Failed to list backups: %v\n", err)
+			} else {
+				fmt.Println("\nAvailable backups:")
+				for i, timestamp := range backups {
+					fmt.Printf("[%d] %s\n", i+1, timestamp)
+				}
+			}
+			
+		case "3":
+			backups, err := backup.ListBackups()
+			if err != nil {
+				fmt.Printf("\n❌ Failed to list backups: %v\n", err)
+				break
+			}
+			
+			if len(backups) == 0 {
+				fmt.Println("\nNo backups available.")
+				break
+			}
+			
+			fmt.Println("\nAvailable backups:")
+			for i, timestamp := range backups {
+				fmt.Printf("[%d] %s\n", i+1, timestamp)
+			}
+			
+			fmt.Print("\nSelect backup to restore (enter number): ")
+			input, _ := reader.ReadString('\n')
+			input = strings.TrimSpace(input)
+			
+			if num, err := strconv.Atoi(input); err == nil && num > 0 && num <= len(backups) {
+				if err := backup.RestoreBackup(backups[num-1]); err != nil {
+					fmt.Printf("\n❌ Failed to restore backup: %v\n", err)
+				} else {
+					fmt.Println("\n✅ Backup restored successfully!")
+				}
+			} else {
+				fmt.Println("\n❌ Invalid selection.")
+			}
+			
+		case "4":
+			return
+			
+		default:
+			fmt.Println("\nInvalid option.")
+		}
+		
+		fmt.Print("\nPress Enter to continue...")
+		reader.ReadString('\n')
+	}
 } 

@@ -6,6 +6,7 @@ type Program struct {
 	ExecutableName string   `json:"executableName"`
 	CommonPaths    []string `json:"commonPaths"`
 	Category       string   `json:"category"`
+	EnvVar         string   `json:"envVar"`
 }
 
 // Configuration holds the global configuration
