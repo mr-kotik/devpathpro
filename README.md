@@ -25,6 +25,7 @@
 </div>
 
 ## 🚀 Overview
+**Note: This tool is oudated, no more updates, check new one [AruDev](https://github.com/AlestackOverglow/arudev)**
 
 DevPathPro is an intelligent environment manager that streamlines the setup and maintenance of your development tools on Windows. It automatically detects installed tools, verifies their configurations, and ensures optimal environment settings.
 
